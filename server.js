@@ -21,7 +21,7 @@ io.on('connection', (socket) => {
   socket.on('chat message', async (msg) => {
     // Forward user message to Python server
     try {
-      const response = await axios.post('http://localhost:5001/bot', { message: msg });
+      const response = await axios.post('https://test-048m.onrender.com/bot', { message: msg });
       const botReply = response.data.bot_reply;
 
       // Send bot reply to all connected clients
