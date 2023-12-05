@@ -1,0 +1,192 @@
+<!-- public/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Chatbot</title>
+  <style>
+    body {
+      font-family: monospace, Tahoma, Geneva, Verdana, sans-serif;
+      font-weight: 500;
+      margin: 20px;
+      background-color: #f0f0f0;
+    }
+
+    #chat-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    #messages {
+      list-style-type: none;
+      padding: 10px;
+      margin: 0;
+      overflow-y: auto;
+      max-height: 300px;
+    }
+
+    #messages li {
+      margin-bottom: 8px;
+      padding: 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    #messages .user-message {
+      color: #000000;
+      justify-content: flex-end;
+    }
+
+    #messages .bot-message {
+      background-color: #6675FA;
+      color: #fff;
+      justify-content: flex-start;
+    }
+
+    .profile-circle {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background-color: #007bffa4; /* Bot's profile picture color */
+      margin-right: 8px;
+      margin-left: 5px;
+    }
+
+    #messages .thinking {
+      background-color: #6675FA;
+      color: #000;
+      justify-content: flex-start;
+    }
+
+    #chat-form {
+      display: flex;
+      padding: 10px;
+      background-color: #eee;
+      border-top: 1px solid #ccc;
+    }
+
+    #message-input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    #message-input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    #send-button {
+      padding: 8px;
+      background-color: #6675FA;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #send-button:hover {
+      background-color: #0056b3;
+    }
+    
+  </style>
+</head>
+
+
+
+<body>
+    <div id="chat-container">
+      <ul id="messages"></ul>
+      <form id="chat-form">
+        <input id="message-input" autocomplete="off" />
+        <button id="send-button">Send</button>
+      </form>
+    </div>
+  
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+      const socket = io();
+  
+      const form = document.querySelector('#chat-form');
+      const input = document.querySelector('#message-input');
+      const messages = document.querySelector('#messages');
+  
+      form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    const userMessage = input.value;
+    if (userMessage) {
+      // Display user message
+      displayMessage('user', userMessage);
+
+      // Send user message to Python server
+      try {
+        const response = await fetch('http://localhost:5001/bot', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: userMessage }),
+        });
+
+        if (response.ok) {
+          const botResponse = await response.json();
+          displayMessage('bot', botResponse.bot_reply);
+        } else {
+          console.error('Error receiving bot reply:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error communicating with the Python server:', error.message);
+      }
+
+      input.value = '';
+        }
+      });
+  
+      function displayMessage(sender, message) {
+        const li = document.createElement('li');
+        const profileCircle = document.createElement('div');
+        profileCircle.classList.add('profile-circle');
+        li.textContent = message;
+
+        if (sender === 'bot') {
+          li.classList.add('bot-message');
+        } else {
+          li.classList.add('user-message');
+          li.appendChild(profileCircle);
+
+        }
+  
+        messages.appendChild(li);
+        messages.scrollTop = messages.scrollHeight; // Scroll to the bottom
+      }
+    </script>
+    <script src="https://cdn.botpress.cloud/webchat/v1/inject.js"></script>
+<script>
+  window.botpressWebChat.init({
+      "composerPlaceholder": "Chat with bot",
+      "botConversationDescription": "This chatbot was built surprisingly fast with Botpress",
+      "botId": "05d40469-c4ab-40f9-b8df-1c75ab45b128",
+      "hostUrl": "https://cdn.botpress.cloud/webchat/v1",
+      "messagingUrl": "https://messaging.botpress.cloud",
+      "clientId": "05d40469-c4ab-40f9-b8df-1c75ab45b128",
+      "webhookId": "eda7edad-b18c-4136-984e-445ad386a543",
+      "lazySocket": true,
+      "themeName": "prism",
+      "frontendVersion": "v1",
+      "theme": "prism",
+      "themeColor": "#2563eb"
+  });
+</script>
+  </body>
+  </html>
+  
+
