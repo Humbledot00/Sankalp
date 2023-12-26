@@ -79,7 +79,7 @@ http://localhost:3000
 * Self-Learning
 * Pre-Trained Model
 
-## Languages used: 
+## Technologies used: 
 * HTML
 * CSS
 * Python
